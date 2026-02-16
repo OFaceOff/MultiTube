@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Fecha modal de ajuda se clicar fora
         const helpModal = document.getElementById('helpModal');
         if (helpModal && helpModal.classList.contains('flex') && event.target === helpModal) {
             closeHelp();
@@ -46,13 +45,28 @@ function onYouTubeIframeAPIReady() {
 }
 
 function getCardWidthClass(count) {
-    if (count <= 1) return 'w-[135vh] max-w-[90vw] aspect-video shadow-2xl'; 
-    if (count === 2) return 'w-[48%] max-h-[calc(100vh-12rem)]'; 
-    if (count === 3) return 'w-[38%]'; 
-    if (count === 4) return 'w-[38%]'; 
-    if (count <= 6) return 'w-[30%]'; 
-    if (count <= 8) return 'w-[23%]'; 
-    return 'w-[19%]'; 
+    // 1 Live: Responsivo, usa altura para limitar mas largura ajustavel
+    // Mobile: w-full
+    if (count <= 1) return 'w-full lg:w-[135vh] lg:max-w-[90vw] aspect-video shadow-2xl'; 
+    
+    // 2 Lives:
+    // Mobile/Tablet: w-full (Empilhado)
+    // Desktop (lg): w-[48%] (Lado a lado)
+    if (count === 2) return 'w-full lg:w-[48%] lg:max-h-[calc(100vh-12rem)] aspect-video'; 
+    
+    // 3-4 Lives:
+    // Mobile: w-full
+    // Tablet (md): 2 colunas
+    // Desktop (lg): 2 colunas menores para caber verticalmente
+    if (count <= 4) return 'w-full md:w-[48%] lg:w-[40%] aspect-video'; 
+    
+    // 5-6 Lives:
+    if (count <= 6) return 'w-full md:w-[48%] lg:w-[30%] aspect-video'; 
+    
+    // 7-8 Lives:
+    if (count <= 8) return 'w-full md:w-[32%] lg:w-[23%] aspect-video'; 
+    
+    return 'w-full md:w-[32%] lg:w-[19%] aspect-video'; 
 }
 
 function setLayout(mode) {
@@ -433,7 +447,6 @@ function toggleGlobalMute() {
                 }
             }
         }
-        // Atualiza visualmente o ícone individual de todos
         updateMuteIcon(stream.uniqueId, isGlobalMuted);
     });
 }
