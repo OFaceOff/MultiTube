@@ -64,6 +64,7 @@ body.dragging-active iframe {
     font-weight: bold;
 }
 
+/* Estilo do Slider de Volume */
 .volume-slider {
     -webkit-appearance: none;
     width: 100%;

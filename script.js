@@ -9,7 +9,8 @@ try {
 let players = {}; 
 let isGlobalMuted = true; 
 let currentLayout = localStorage.getItem('multilive_layout') || 'auto';
-let pendingStream = null; 
+let pendingStream = null;
+let targetStreamUniqueId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
@@ -23,16 +24,19 @@ document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
     }
 
+    // Listeners globais
     document.addEventListener('click', function(event) {
-        const audioDropdown = document.getElementById('audioMixerDropdown');
-        const audioBtn = document.getElementById('audioMixerBtn');
+        const dropdown = document.getElementById('audioMixerDropdown');
+        const btn = document.getElementById('audioMixerBtn');
         
-        if (audioDropdown && !audioDropdown.classList.contains('hidden')) {
-            if (!audioDropdown.contains(event.target) && !audioBtn.contains(event.target)) {
+        // Fecha mixer
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            if (!dropdown.contains(event.target) && !btn.contains(event.target)) {
                 toggleAudioMixer();
             }
         }
 
+        // Fecha modal de ajuda
         const helpModal = document.getElementById('helpModal');
         if (helpModal && helpModal.classList.contains('flex') && event.target === helpModal) {
             closeHelp();
@@ -44,62 +48,9 @@ function onYouTubeIframeAPIReady() {
     renderGrid();
 }
 
-function getCardWidthClass(count) {
-    // 1 Live: Responsivo, usa altura para limitar mas largura ajustavel
-    // Mobile: w-full
-    if (count <= 1) return 'w-full lg:w-[135vh] lg:max-w-[90vw] aspect-video shadow-2xl'; 
-    
-    // 2 Lives:
-    // Mobile/Tablet: w-full (Empilhado)
-    // Desktop (lg): w-[48%] (Lado a lado)
-    if (count === 2) return 'w-full lg:w-[48%] lg:max-h-[calc(100vh-12rem)] aspect-video'; 
-    
-    // 3-4 Lives:
-    // Mobile: w-full
-    // Tablet (md): 2 colunas
-    // Desktop (lg): 2 colunas menores para caber verticalmente
-    if (count <= 4) return 'w-full md:w-[48%] lg:w-[40%] aspect-video'; 
-    
-    // 5-6 Lives:
-    if (count <= 6) return 'w-full md:w-[48%] lg:w-[30%] aspect-video'; 
-    
-    // 7-8 Lives:
-    if (count <= 8) return 'w-full md:w-[32%] lg:w-[23%] aspect-video'; 
-    
-    return 'w-full md:w-[32%] lg:w-[19%] aspect-video'; 
-}
-
-function setLayout(mode) {
-    currentLayout = mode;
-    localStorage.setItem('multilive_layout', mode);
-    applyActiveButtonState(mode);
-    renderGrid();
-}
-
-function applyActiveButtonState(mode) {
-    document.querySelectorAll('.layout-btn').forEach(btn => {
-        btn.classList.remove('bg-slate-800', 'text-slate-200');
-        btn.classList.add('text-slate-400');
-    });
-    const activeBtn = document.getElementById(`btn-layout-${mode}`);
-    if (activeBtn) {
-        activeBtn.classList.add('bg-slate-800', 'text-slate-200');
-        activeBtn.classList.remove('text-slate-400');
-    }
-}
-
-function handleEnter(e) { if (e.key === 'Enter') addStream(); }
-
-function addStream() {
-    const input = document.getElementById('channelInput');
-    const rawInput = input.value.trim();
-
-    if (!rawInput) return;
-    if (rawInput.includes('@') && !rawInput.includes('kick.com')) {
-        alert('O YouTube bloqueia buscar lives apenas pelo @Nome. Use o link do vídeo.');
-        return;
-    }
-
+// --- Lógica de URL ---
+function getStreamDataFromUrl(rawInput) {
+    if (!rawInput) return null;
     let id = null;
     let type = 'video';
     
@@ -128,11 +79,29 @@ function addStream() {
         type = 'video';
     }
 
-    if (!id) { alert('Link não reconhecido (YouTube ou Kick).'); return; }
+    if (!id) return null;
+    return { id, type };
+}
 
-    const newStreamObj = { id: id, type: type, uniqueId: 'stream_' + Date.now() };
+function addStream() {
+    const input = document.getElementById('channelInput');
+    const rawInput = input.value.trim();
 
-    const isDuplicate = streams.some(s => s.id === id);
+    if (!rawInput) return;
+    if (rawInput.includes('@') && !rawInput.includes('kick.com')) {
+        alert('O YouTube bloqueia buscar lives apenas pelo @Nome. Use o link do vídeo.');
+        return;
+    }
+
+    const streamData = getStreamDataFromUrl(rawInput);
+    if (!streamData) {
+            alert('Link não reconhecido (YouTube ou Kick).'); 
+            return; 
+    }
+
+    const newStreamObj = { id: streamData.id, type: streamData.type, uniqueId: 'stream_' + Date.now() };
+
+    const isDuplicate = streams.some(s => s.id === streamData.id);
 
     if (isDuplicate) {
         pendingStream = newStreamObj;
@@ -149,16 +118,64 @@ function finalizeAddStream(streamObj) {
     renderGrid();
 }
 
-function showConfirmModal() {
-    const modal = document.getElementById('confirmModal');
+// --- Stream Update Functions ---
+function openChangeStreamModal(uniqueId) {
+    targetStreamUniqueId = uniqueId;
+    const modal = document.getElementById('changeStreamModal');
+    document.getElementById('changeStreamInput').value = '';
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    document.getElementById('changeStreamInput').focus();
+}
+
+function closeChangeStreamModal() {
+    const modal = document.getElementById('changeStreamModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    targetStreamUniqueId = null;
+}
+
+function confirmChangeStream() {
+    const input = document.getElementById('changeStreamInput');
+    const rawInput = input.value.trim();
+    if(!rawInput || !targetStreamUniqueId) return;
+
+    const streamData = getStreamDataFromUrl(rawInput);
+    if(!streamData) {
+        alert('Link inválido.');
+        return;
+    }
+
+    // Atualiza o stream existente
+    const index = streams.findIndex(s => s.uniqueId === targetStreamUniqueId);
+    if (index !== -1) {
+        // Preserva o uniqueId para manter a posição, mas atualiza os dados
+        streams[index].id = streamData.id;
+        streams[index].type = streamData.type;
+        
+        // Se era YT e virou Kick (ou vice versa), ou mudou ID, precisamos limpar player
+        if (players[targetStreamUniqueId]) {
+            if (typeof players[targetStreamUniqueId].destroy === 'function') {
+                players[targetStreamUniqueId].destroy();
+            }
+            delete players[targetStreamUniqueId];
+        }
+
+        saveStreams();
+        renderGrid();
+        closeChangeStreamModal();
+    }
+}
+
+// --- Modals ---
+function showConfirmModal() {
+    document.getElementById('confirmModal').classList.remove('hidden');
+    document.getElementById('confirmModal').classList.add('flex');
 }
 
 function closeConfirmModal() {
-    const modal = document.getElementById('confirmModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    document.getElementById('confirmModal').classList.add('hidden');
+    document.getElementById('confirmModal').classList.remove('flex');
 }
 
 function confirmAddStream() {
@@ -272,6 +289,16 @@ function updateEmptyState() {
     }
 }
 
+function getCardWidthClass(count) {
+    if (count <= 1) return 'w-[135vh] max-w-[90vw] aspect-video shadow-2xl'; 
+    if (count === 2) return 'w-[48%] max-h-[calc(100vh-12rem)]'; 
+    if (count === 3) return 'w-[38%]'; 
+    if (count === 4) return 'w-[38%]'; 
+    if (count <= 6) return 'w-[30%]'; 
+    if (count <= 8) return 'w-[23%]'; 
+    return 'w-[19%]'; 
+}
+
 function renderGrid() {
     Object.values(players).forEach(player => {
         if (player && typeof player.destroy === 'function') {
@@ -314,6 +341,9 @@ function renderGrid() {
                         <i data-lucide="grip-horizontal" class="w-4 h-4"></i>
                     </div>
                     ${badge}
+                    <button onclick="openChangeStreamModal('${stream.uniqueId}')" class="text-white/70 hover:text-white p-1 bg-slate-900/50 hover:bg-slate-900/80 rounded backdrop-blur-sm transition" title="Trocar Live">
+                        <i data-lucide="replace" class="w-3 h-3"></i>
+                    </button>
                     <button onclick="toggleMuteSingle('${stream.uniqueId}')" class="text-white/70 hover:text-white p-1 bg-slate-900/50 hover:bg-slate-900/80 rounded backdrop-blur-sm transition" title="Mutar/Desmutar">
                         <i data-lucide="${isGlobalMuted ? 'volume-x' : 'volume-2'}" class="w-3 h-3" id="mute-icon-${stream.uniqueId}"></i>
                     </button>
@@ -419,7 +449,6 @@ function toggleGlobalMute() {
     btnContainer.innerHTML = `<i data-lucide="${isGlobalMuted ? 'volume-x' : 'volume-2'}" class="w-5 h-5"></i>`;
     lucide.createIcons();
 
-    // Muta YouTube
     Object.values(players).forEach(player => {
         if (player && typeof player.mute === 'function') {
             if (isGlobalMuted) {
@@ -430,7 +459,6 @@ function toggleGlobalMute() {
         }
     });
 
-    // Muta Kick (Recarregando)
     streams.forEach(stream => {
         if (stream.type === 'kick') {
             const card = document.querySelector(`[data-unique-id="${stream.uniqueId}"]`);
@@ -439,7 +467,6 @@ function toggleGlobalMute() {
                 if (iframe) {
                     const urlObj = new URL(iframe.src);
                     const currentMuted = urlObj.searchParams.get('muted') === 'true';
-                    // Só recarrega se o estado for diferente
                     if (currentMuted !== isGlobalMuted) {
                         urlObj.searchParams.set('muted', isGlobalMuted);
                         iframe.src = urlObj.toString();
@@ -604,3 +631,32 @@ function handleDragEnd(e) {
 
 function showHelp() { document.getElementById('helpModal').classList.remove('hidden'); document.getElementById('helpModal').classList.add('flex'); }
 function closeHelp() { document.getElementById('helpModal').classList.add('hidden'); document.getElementById('helpModal').classList.remove('flex'); }
+
+// Adicionando a função de Layout que faltava na declaração original mas é usada no HTML
+function setLayout(layout) {
+    currentLayout = layout;
+    localStorage.setItem('multilive_layout', layout);
+    applyActiveButtonState(layout);
+    renderGrid();
+    renderMixerItems();
+}
+
+function applyActiveButtonState(layout) {
+    const buttons = document.querySelectorAll('.layout-btn');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-red-500/20', 'text-red-500', 'ring-1', 'ring-red-500/50');
+        btn.classList.add('text-slate-400');
+    });
+
+    const activeBtn = document.getElementById(`btn-layout-${layout}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-red-500/20', 'text-red-500', 'ring-1', 'ring-red-500/50');
+    }
+}
+
+function handleEnter(e) {
+    if (e.key === 'Enter') {
+        addStream();
+    }
+}

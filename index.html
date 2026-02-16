@@ -6,9 +6,7 @@
     <title>MultiTube - Visualizador de múltiplas lives</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
@@ -109,6 +107,24 @@
         </div>
     </main>
 
+    <div id="changeStreamModal" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-[60] backdrop-blur-sm px-4">
+        <div class="bg-slate-800 p-6 rounded-xl shadow-2xl max-w-md w-full border border-slate-700">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white">Trocar Live</h3>
+                <button onclick="closeChangeStreamModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">Cole o link da nova live para substituir a atual.</p>
+            <input type="text" id="changeStreamInput" 
+                placeholder="Novo link (Youtube ou Kick)..." 
+                class="w-full bg-slate-900 border border-slate-600 text-slate-200 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block p-2.5 mb-4 placeholder-slate-500">
+            
+            <div class="flex justify-end gap-2">
+                <button onclick="closeChangeStreamModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm">Cancelar</button>
+                <button onclick="confirmChangeStream()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Trocar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="helpModal" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-50 backdrop-blur-sm px-4">
         <div class="bg-slate-800 p-6 rounded-xl shadow-2xl max-w-md w-full border border-slate-700 relative">
             <div class="flex justify-between items-center mb-6">
@@ -120,6 +136,7 @@
             <div class="space-y-4 text-slate-300 text-sm">
                 <p><strong>Plataformas:</strong> YouTube e Kick.</p>
                 <p><strong>Adicionar:</strong> Cole o link (ex: <code>kick.com/fulano</code> ou <code>youtube.com/watch...</code>).</p>
+                <p><strong>Trocar Live:</strong> Clique no ícone <i data-lucide="replace" class="inline w-3 h-3"></i> na barra superior da live para substituir o link.</p>
                 <p><strong>Layout:</strong> Use os números para limitar quantas telas você vê.</p>
                 <p><strong>Áudio:</strong> Use o botão <i data-lucide="sliders-horizontal" class="inline w-3 h-3"></i> para controlar o volume das lives do YouTube. Para Kick, use o controle do próprio vídeo.</p>
                 <p class="text-yellow-500 font-medium mt-2">⚠️ Sobre o Volume da Kick:</p>
@@ -148,7 +165,6 @@
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
-    
     <script src="script.js"></script>
 </body>
 </html>
