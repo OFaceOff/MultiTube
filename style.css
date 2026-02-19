@@ -56,7 +56,6 @@ body.dragging-active iframe {
     color: black;
     font-weight: bold;
 }
-
 .yt-badge {
     background-color: #ff0000;
     color: white;
@@ -71,7 +70,6 @@ body.dragging-active iframe {
     background: #475569;
     outline: none;
 }
-
 .volume-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
