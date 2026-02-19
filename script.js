@@ -12,21 +12,6 @@ let pendingStream = null;
 let targetStreamUniqueId = null;
 let focusedStreamId = null;
 
-let idleTimer;
-const headerEl = document.getElementById('main-header');
-
-function resetIdleTimer() {
-    if (headerEl.classList.contains('-translate-y-full')) {
-        headerEl.classList.remove('-translate-y-full', 'opacity-0');
-    }
-    clearTimeout(idleTimer);
-    if (streams.length > 0) {
-        idleTimer = setTimeout(() => {
-            headerEl.classList.add('-translate-y-full', 'opacity-0');
-        }, 3500); 
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
@@ -35,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     updateLayoutStyles(); 
-    updateEmptyState();
+    if(typeof updateEmptyState === 'function') updateEmptyState();
 
     const btnContainer = document.getElementById('globalMuteBtn');
     if(btnContainer) {
@@ -58,13 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             closeHelp();
         }
     });
-
-    document.addEventListener('mousemove', resetIdleTimer);
-    document.addEventListener('mousedown', resetIdleTimer);
-    document.addEventListener('keypress', resetIdleTimer);
-    document.addEventListener('touchstart', resetIdleTimer);
-    
-    resetIdleTimer();
 });
 
 function onYouTubeIframeAPIReady() {
@@ -181,8 +159,16 @@ function updateLayoutStyles() {
 
         lucide.createIcons();
     }
-    updateEmptyState();
-    resetIdleTimer();
+    if(typeof updateEmptyState === 'function') updateEmptyState();
+}
+
+function updateEmptyState() {
+    const emptyState = document.getElementById('emptyState');
+    if (streams.length === 0) {
+        emptyState.classList.remove('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+    }
 }
 
 function renderDOM(visibleStreams) {
@@ -197,6 +183,7 @@ function renderDOM(visibleStreams) {
     visibleStreams.forEach((stream, index) => {
         const card = document.createElement('div');
         card.dataset.uniqueId = stream.uniqueId;
+        
         card.className = `stream-card bg-slate-800 rounded-xl overflow-hidden shadow-xl relative group draggable transition-all duration-300 ${getCardWidthClass(currentLayout, stream.uniqueId, visibleStreams.length)}`;
         
         if (currentLayout === 'focus') {
@@ -444,9 +431,11 @@ function toggleMuteSingle(uniqueId) {
             const currentSrc = iframe.src;
             const isMuted = currentSrc.includes('muted=true');
             const newMuted = !isMuted;
+            
             const urlObj = new URL(currentSrc);
             urlObj.searchParams.set('muted', newMuted);
             iframe.src = urlObj.toString();
+            
             updateMuteIcon(uniqueId, newMuted);
         }
     } else {
@@ -595,6 +584,8 @@ function setStreamVolume(uniqueId, val) {
     }
 }
 
+let dragSrcEl = null;
+
 function setupDragEventsCard() {
      const items = document.querySelectorAll('.stream-card');
      items.forEach(item => {
@@ -631,12 +622,3 @@ function handleDrop(e) {
 function handleDragEnd(e) { this.style.opacity = '1'; document.querySelectorAll('.stream-card').forEach(item => item.classList.remove('drag-over')); document.body.classList.remove('dragging-active'); }
 function showHelp() { document.getElementById('helpModal').classList.remove('hidden'); document.getElementById('helpModal').classList.add('flex'); }
 function closeHelp() { document.getElementById('helpModal').classList.add('hidden'); document.getElementById('helpModal').classList.remove('flex'); }
-
-function updateEmptyState() {
-    const emptyState = document.getElementById('emptyState');
-    if (streams.length === 0) {
-        emptyState.classList.remove('hidden');
-    } else {
-        emptyState.classList.add('hidden');
-    }
-}

@@ -7,12 +7,14 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="h-screen flex flex-col overflow-hidden bg-slate-900 relative">
 
-    <header id="main-header" class="fixed top-0 left-0 right-0 bg-slate-800/95 backdrop-blur border-b border-slate-700 p-4 z-50 shadow-md transition-all duration-500">
+    <header id="main-header" class="fixed top-0 left-0 right-0 bg-slate-800/95 backdrop-blur border-b border-slate-700 p-4 z-50 shadow-md">
         <div class="flex flex-col xl:flex-row items-center justify-between gap-4 max-w-[1920px] mx-auto w-full">
             
             <div class="flex items-center gap-3 min-w-fit">
@@ -38,6 +40,7 @@
             </div>
 
             <div class="flex items-center gap-2 flex-wrap justify-center relative">
+                
                 <div class="bg-slate-900 rounded-lg border border-slate-700 flex items-center p-1 mr-2 gap-1">
                     <button onclick="setLayout('auto')" id="btn-layout-auto" class="layout-btn p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition" title="5+ Lives">
                         <i data-lucide="layout-grid" class="w-4 h-4"></i>
@@ -45,6 +48,7 @@
                     <button onclick="setLayout('focus')" id="btn-layout-focus" class="layout-btn p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition" title="Modo Destaque (1 Grande + 4 Pequenas)">
                         <i data-lucide="layout-template" class="w-4 h-4"></i>
                     </button>
+
                     <div class="w-px h-4 bg-slate-700 mx-1"></div>
                     <button onclick="setLayout(1)" id="btn-layout-1" class="layout-btn p-2 rounded-md hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition" title="Focar em 1">
                         <span class="text-xs font-bold w-4 h-4 flex items-center justify-center">1</span>
@@ -64,10 +68,12 @@
                     <button onclick="syncAllStreams()" class="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition" title="Sincronizar (Apenas YouTube)">
                         <i data-lucide="refresh-cw" class="w-5 h-5"></i>
                     </button>
+
                     <div class="relative">
                         <button onclick="toggleAudioMixer()" id="audioMixerBtn" class="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition" title="Mixer de Áudio">
                             <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
                         </button>
+                        
                         <div id="audioMixerDropdown" class="hidden absolute right-0 top-full mt-2 w-72 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-4 z-50">
                             <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-700">
                                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -80,9 +86,11 @@
                             </div>
                         </div>
                     </div>
+
                     <button onclick="toggleGlobalMute()" id="globalMuteBtn" class="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition" title="Mutar/Desmutar Todos">
                         <i data-lucide="volume-x" class="w-5 h-5"></i>
                     </button>
+                    
                     <button onclick="showHelp()" class="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 rounded-lg transition" title="Ajuda">
                         <i data-lucide="help-circle" class="w-5 h-5"></i>
                     </button>
@@ -94,6 +102,7 @@
     <main class="flex-1 overflow-y-auto relative w-full h-full flex p-4 pt-[6.5rem] bg-slate-900">
         <div id="gridContainer" class="flex flex-wrap justify-center content-center items-center gap-4 transition-all duration-300 w-full max-w-[1920px] m-auto h-full">
         </div>
+
         <div id="emptyState" class="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-0 pointer-events-none">
             <div class="bg-slate-800 p-6 rounded-full mb-4 border border-slate-700 shadow-xl">
                 <i data-lucide="tv-2" class="w-16 h-16 opacity-50"></i>
@@ -113,6 +122,7 @@
             <input type="text" id="changeStreamInput" 
                 placeholder="Novo link (Youtube ou Kick)..." 
                 class="w-full bg-slate-900 border border-slate-600 text-slate-200 text-sm rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 block p-2.5 mb-4 placeholder-slate-500">
+            
             <div class="flex justify-end gap-2">
                 <button onclick="closeChangeStreamModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm">Cancelar</button>
                 <button onclick="confirmChangeStream()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Trocar</button>
@@ -128,6 +138,7 @@
                 </h3>
                 <button onclick="closeHelp()" class="text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
+            
             <div class="space-y-4 text-slate-300 text-sm overflow-y-auto pr-2 pb-2 custom-scrollbar">
                 <div class="space-y-2">
                     <p><strong><i data-lucide="plus" class="inline w-3 h-3 text-red-500 mr-1"></i>Adicionar:</strong> Cole o link (ex: <code>kick.com/fulano</code> ou YouTube) na barra superior.</p>
@@ -136,17 +147,18 @@
                     <p><strong><i data-lucide="grip-horizontal" class="inline w-3 h-3 text-green-400 mr-1"></i>Organizar:</strong> Clique e segure a barra de topo de qualquer janela para arrastá-la e trocar sua posição.</p>
                     <p><strong><i data-lucide="replace" class="inline w-3 h-3 text-orange-400 mr-1"></i>Trocar Live:</strong> Se uma live cair, clique no botão de troca na janela dela para substituir o link sem afetar as outras.</p>
                     <p><strong><i data-lucide="sliders-horizontal" class="inline w-3 h-3 text-pink-400 mr-1"></i>Mixer de Áudio:</strong> Controle o volume individual das lives do YouTube usando o mixer no topo. O botão de megafone muta todas simultaneamente.</p>
-                    <p><strong><i data-lucide="eye-off" class="inline w-3 h-3 text-slate-400 mr-1"></i>Barra Inteligente:</strong> O menu superior esconde sozinho quando o mouse fica parado. Mexa o mouse para vê-lo novamente.</p>
                 </div>
+
                 <div class="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-lg mt-4">
                     <p class="text-yellow-500 font-medium mb-1 flex items-center gap-1">
                         <i data-lucide="alert-triangle" class="w-4 h-4"></i> Restrições da Kick
                     </p>
                     <p class="text-xs text-slate-400">
-                        O slider de volume e os controles internos da Kick podem sumir dependendo do tamanho da tela. Por segurança da plataforma deles, nosso botão de mutar/desmutar a Kick funciona recarregando a janela inteira em modo mudo.
+                        O slider de volume da Kick pode desaparecer quando o player está muito pequeno ou quando há 3 ou mais lives ativas, devido a limitações do iframe para alguns usuários. Por isso, o botão de mutar/desmutar a Kick funciona recarregando a janela inteira em modo mudo.
                     </p>
                 </div>
             </div>
+
             <div class="flex justify-end mt-4 pt-4 border-t border-slate-700 flex-shrink-0">
                 <button onclick="closeHelp()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-lg shadow-red-900/20">Entendi</button>
             </div>
@@ -154,7 +166,7 @@
     </div>
 
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-50 backdrop-blur-sm px-4">
-        <div class="bg-slate-800 p-6 rounded-xl shadow-2xl max-sm w-full border border-slate-700 text-center transform transition-all scale-100">
+        <div class="bg-slate-800 p-6 rounded-xl shadow-2xl max-w-sm w-full border border-slate-700 text-center transform transition-all scale-100">
             <div class="mx-auto bg-yellow-500/10 w-12 h-12 rounded-full flex items-center justify-center mb-4 ring-1 ring-yellow-500/30">
                 <i data-lucide="alert-triangle" class="text-yellow-500 w-6 h-6"></i>
             </div>
