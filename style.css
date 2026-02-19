@@ -11,7 +11,7 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 .stream-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.3s ease, height 0.3s ease, border-color 0.2s;
     border: 1px solid transparent;
 }
 
@@ -19,7 +19,6 @@ body {
     border-color: #ef4444; 
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
     z-index: 10;
-    transform: scale(1.01);
 }
 
 .card-header {
@@ -50,7 +49,6 @@ body.dragging-active iframe {
 .stream-card.drag-over {
     border-color: #ef4444; 
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.5);
-    transform: scale(0.98);
 }
 
 .kick-badge {
@@ -58,13 +56,13 @@ body.dragging-active iframe {
     color: black;
     font-weight: bold;
 }
+
 .yt-badge {
     background-color: #ff0000;
     color: white;
     font-weight: bold;
 }
 
-/* Estilo do Slider de Volume */
 .volume-slider {
     -webkit-appearance: none;
     width: 100%;
@@ -73,6 +71,7 @@ body.dragging-active iframe {
     background: #475569;
     outline: none;
 }
+
 .volume-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
