@@ -20,12 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     updateLayoutStyles(); 
-    if(typeof updateEmptyState === 'function') updateEmptyState();
+    updateEmptyState();
 
     const btnContainer = document.getElementById('globalMuteBtn');
     if(btnContainer) {
-         btnContainer.innerHTML = `<i data-lucide="${isGlobalMuted ? 'volume-x' : 'volume-2'}" class="w-5 h-5"></i>`;
-         lucide.createIcons();
+            btnContainer.innerHTML = `<i data-lucide="${isGlobalMuted ? 'volume-x' : 'volume-2'}" class="w-5 h-5"></i>`;
+            lucide.createIcons();
     }
 
     document.addEventListener('click', function(event) {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function onYouTubeIframeAPIReady() {
     if (Object.keys(players).length === 0) {
-       updateLayoutStyles();
+        updateLayoutStyles();
     }
 }
 
@@ -134,14 +134,15 @@ function updateLayoutStyles() {
     if (currentIds !== visibleIds) {
         renderDOM(visibleStreams);
     } else {
-        currentCards.forEach((card, index) => {
+        currentCards.forEach((card) => {
             const uniqueId = card.dataset.uniqueId;
+            const newOrder = visibleStreams.findIndex(s => s.uniqueId === uniqueId);
             card.className = `stream-card bg-slate-800 rounded-xl overflow-hidden shadow-xl relative group draggable transition-all duration-300 ${getCardWidthClass(currentLayout, uniqueId, visibleStreams.length)}`;
             
             if (currentLayout === 'focus') {
-                card.style.order = uniqueId === focusedStreamId ? -2 : index;
+                card.style.order = uniqueId === focusedStreamId ? -2 : newOrder;
             } else {
-                card.style.order = index;
+                card.style.order = newOrder;
             }
         });
 
@@ -159,16 +160,7 @@ function updateLayoutStyles() {
 
         lucide.createIcons();
     }
-    if(typeof updateEmptyState === 'function') updateEmptyState();
-}
-
-function updateEmptyState() {
-    const emptyState = document.getElementById('emptyState');
-    if (streams.length === 0) {
-        emptyState.classList.remove('hidden');
-    } else {
-        emptyState.classList.add('hidden');
-    }
+    updateEmptyState();
 }
 
 function renderDOM(visibleStreams) {
@@ -198,12 +190,6 @@ function renderDOM(visibleStreams) {
             ? '<span class="kick-badge text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider">KICK</span>'
             : '<span class="yt-badge text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider">YT</span>';
 
-        const focusBtn = `
-            <button onclick="setFocus('${stream.uniqueId}')" class="text-white/70 hover:text-red-500 p-1 bg-slate-900/50 hover:bg-slate-900/80 rounded backdrop-blur-sm transition" title="Destacar Live">
-                <i data-lucide="crosshair" class="w-3 h-3"></i>
-            </button>
-        `;
-
         card.innerHTML = `
             <div class="card-header absolute top-0 left-0 right-0 h-8 z-20 flex justify-between items-center px-2">
                 <div class="flex items-center gap-2">
@@ -211,7 +197,12 @@ function renderDOM(visibleStreams) {
                         <i data-lucide="grip-horizontal" class="w-4 h-4"></i>
                     </div>
                     <span class="badge-container">${badge}</span>
-                    ${focusBtn}
+                    <button onclick="setFocus('${stream.uniqueId}')" class="text-white/70 hover:text-red-500 p-1 bg-slate-900/50 hover:bg-slate-900/80 rounded backdrop-blur-sm transition" title="Destacar Live">
+                        <i data-lucide="crosshair" class="w-3 h-3"></i>
+                    </button>
+                    <button onclick="openChat('${stream.uniqueId}')" class="text-white/70 hover:text-blue-400 p-1 bg-slate-900/50 hover:bg-slate-900/80 rounded backdrop-blur-sm transition" title="Abrir Chat da Live">
+                        <i data-lucide="message-square" class="w-3 h-3"></i>
+                    </button>
                     <button onclick="openChangeStreamModal('${stream.uniqueId}')" class="text-white/70 hover:text-white p-1 bg-slate-900/50 hover:bg-slate-900/80 rounded backdrop-blur-sm transition" title="Trocar Live">
                         <i data-lucide="replace" class="w-3 h-3"></i>
                     </button>
@@ -268,6 +259,15 @@ function renderDOM(visibleStreams) {
     }
 }
 
+function updateEmptyState() {
+    const emptyState = document.getElementById('emptyState');
+    if (streams.length === 0) {
+        emptyState.classList.remove('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+    }
+}
+
 function handleEnter(e) { if (e.key === 'Enter') addStream(); }
 
 function getStreamDataFromUrl(rawInput) {
@@ -303,8 +303,8 @@ function addStream() {
 
     const streamData = getStreamDataFromUrl(rawInput);
     if (!streamData) {
-         alert('Link não reconhecido (YouTube ou Kick).'); 
-         return; 
+            alert('Link não reconhecido (YouTube ou Kick).'); 
+            return; 
     }
 
     const newStreamObj = { id: streamData.id, type: streamData.type, uniqueId: 'stream_' + Date.now() };
@@ -395,29 +395,29 @@ function confirmChangeStream() {
 }
 
 function reloadStream(uniqueId) {
-     const stream = streams.find(s => s.uniqueId === uniqueId);
-     if (!stream) return;
-     if (players[uniqueId]) { players[uniqueId].destroy(); delete players[uniqueId]; }
-     const card = document.querySelector(`[data-unique-id="${uniqueId}"]`);
-     if (!card) return;
-     
-     const containerDiv = card.querySelector('.stream-container');
-     containerDiv.innerHTML = ''; 
-     
-     if (stream.type === 'kick') {
+        const stream = streams.find(s => s.uniqueId === uniqueId);
+        if (!stream) return;
+        if (players[uniqueId]) { players[uniqueId].destroy(); delete players[uniqueId]; }
+        const card = document.querySelector(`[data-unique-id="${uniqueId}"]`);
+        if (!card) return;
+        
+        const containerDiv = card.querySelector('.stream-container');
+        containerDiv.innerHTML = ''; 
+        
+        if (stream.type === 'kick') {
         const iframe = document.createElement('iframe');
         iframe.src = `https://player.kick.com/${stream.id}?autoplay=true&muted=${isGlobalMuted}`; 
         iframe.height = "100%"; iframe.width = "100%"; iframe.style.border = "none";
         iframe.setAttribute('allowfullscreen', 'true');
         iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write');
         containerDiv.appendChild(iframe);
-     } else {
-         const div = document.createElement('div');
-         div.id = `player_${stream.uniqueId}`;
-         div.className = "w-full h-full";
-         containerDiv.appendChild(div);
-         createPlayer(stream);
-     }
+        } else {
+            const div = document.createElement('div');
+            div.id = `player_${stream.uniqueId}`;
+            div.className = "w-full h-full";
+            containerDiv.appendChild(div);
+            createPlayer(stream);
+        }
 }
 
 function toggleMuteSingle(uniqueId) {
@@ -448,11 +448,11 @@ function toggleMuteSingle(uniqueId) {
 }
 
 function updateMuteIcon(uniqueId, isMuted) {
-     const icon = document.getElementById(`mute-icon-${uniqueId}`);
-     if(icon) {
-         icon.setAttribute('data-lucide', isMuted ? 'volume-x' : 'volume-2');
-         lucide.createIcons();
-     }
+        const icon = document.getElementById(`mute-icon-${uniqueId}`);
+        if(icon) {
+            icon.setAttribute('data-lucide', isMuted ? 'volume-x' : 'volume-2');
+            lucide.createIcons();
+        }
 }
 
 function saveStreams() {
@@ -550,10 +550,10 @@ function renderMixerItems() {
         item.appendChild(label);
         
         if (stream.type === 'kick') {
-             const info = document.createElement('div');
-             info.className = 'text-[10px] text-slate-500 italic pl-5';
-             info.innerText = 'Controle no Player';
-             item.appendChild(info);
+                const info = document.createElement('div');
+                info.className = 'text-[10px] text-slate-500 italic pl-5';
+                info.innerText = 'Controle no Player';
+                item.appendChild(info);
         } else {
             const controls = document.createElement('div');
             controls.className = 'flex items-center gap-2';
@@ -584,18 +584,47 @@ function setStreamVolume(uniqueId, val) {
     }
 }
 
-let dragSrcEl = null;
+function openChat(uniqueId) {
+    const stream = streams.find(s => s.uniqueId === uniqueId);
+    if (!stream) return;
+    
+    document.body.classList.add('chat-active');
+    const container = document.getElementById('chatContainer');
+    container.innerHTML = ''; 
+    
+    if (stream.type === 'kick') {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://kick.com/popout/${stream.id}/chat`;
+        iframe.className = "w-full h-full border-none";
+        container.appendChild(iframe);
+    } else if (stream.type === 'video') {
+        const domain = window.location.hostname || 'localhost';
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/live_chat?v=${stream.id}&embed_domain=${domain}`;
+        iframe.className = "w-full h-full border-none";
+        container.appendChild(iframe);
+    } else if (stream.type === 'channel') {
+        container.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm mt-10">O chat do YouTube requer o link direto do vídeo/live.<br><br>Você adicionou usando o link do canal, portanto o chat não pode ser carregado.</div>`;
+    }
+}
+
+function closeChat() {
+    document.body.classList.remove('chat-active');
+    setTimeout(() => {
+        document.getElementById('chatContainer').innerHTML = '';
+    }, 300); 
+}
 
 function setupDragEventsCard() {
-     const items = document.querySelectorAll('.stream-card');
-     items.forEach(item => {
+        const items = document.querySelectorAll('.stream-card');
+        items.forEach(item => {
         item.addEventListener('dragstart', handleDragStart, false);
         item.addEventListener('dragenter', handleDragEnter, false);
         item.addEventListener('dragover', handleDragOver, false);
         item.addEventListener('dragleave', handleDragLeave, false);
         item.addEventListener('drop', handleDrop, false);
         item.addEventListener('dragend', handleDragEnd, false);
-     });
+        });
 }
 
 function handleDragStart(e) { this.style.opacity = '0.4'; dragSrcEl = this; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/html', this.dataset.uniqueId); document.body.classList.add('dragging-active'); }

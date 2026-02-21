@@ -3,6 +3,7 @@ body {
     background-color: #0f172a; 
     color: #e2e8f0;
     transition: background-color 0.5s ease;
+    overflow: hidden;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -11,7 +12,7 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 .stream-card {
-    transition: width 0.3s ease, height 0.3s ease, border-color 0.2s;
+    transition: all 0.3s ease;
     border: 1px solid transparent;
 }
 
@@ -78,4 +79,21 @@ body.dragging-active iframe {
     border-radius: 50%;
     background: #ef4444;
     cursor: pointer;
+}
+
+main {
+    transition: padding-right 0.3s ease-in-out;
+}
+
+body.chat-active main {
+    padding-right: 25rem; 
+}
+
+#chatSidebar {
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+body.chat-active #chatSidebar {
+    transform: translateX(0);
 }
